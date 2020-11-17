@@ -154,7 +154,7 @@ export default {
         // 负数：往上；正数：往下
         let direction = moveY - this.touchStartY;
         // 如果移动的距离大于一个item的高度的一半，直接跳到下个item
-        if(Math.abs(direction) > this.ITEM_HEIGHT / 2) {
+        if(Math.abs(direction) > this.ITEM_HEIGHT / 2 && Math.abs(direction) < this.ITEM_HEIGHT) {
           direction = direction < 0 ? -this.ITEM_HEIGHT : this.ITEM_HEIGHT;
         }
         const index = direction < 0 ? Math.floor(direction / this.ITEM_HEIGHT) : Math.ceil(direction / this.ITEM_HEIGHT);
