@@ -9,17 +9,23 @@
         label="起止时间"
         :value="selectedTimeRange"
         placeholder="请选择起止时间"
-        @click="showTimeRangePicker = true" />
+        @click="showTimeRange = true" />
         <TimeRange 
-          :isShow="showTimeRangePicker" />
-        <!-- <van-popup v-model="showPeriodPicker" position="bottom" :style="{height: '40%'}">
-          <van-datetime-picker
-            v-model="currentPeriod"
-            type="time"
-            :min-hour="10"
-            :max-hour="20"
-          />
-        </van-popup> -->
+          :isShow="showTimeRange" />
+    </van-cell>
+
+    <van-cell>
+      <van-field
+        readonly
+        clickable
+        required
+        name="timeRangeField"
+        label="填报时间"
+        :value="selectedTimeRange"
+        placeholder="请选择填报时间"
+        @click="showTimePicker = true" />
+        <TimePicker 
+          :isShow="showTimePicker" />
     </van-cell>
 
     <van-cell>
@@ -53,11 +59,13 @@
 
 <script>
 import TimeRange from '@/components/TimeRange'
+import TimePicker from '@/components/TimePicker'
 
 export default {
   name: 'Project',
   components: {
-    TimeRange
+    TimeRange,
+    TimePicker
   },
   data() {
     return {
@@ -66,7 +74,8 @@ export default {
       columns: ['杭州', '宁波', '温州', '绍兴', '湖州', '嘉兴', '金华', '衢州'],
       searchProjectVal: '',
       selectedTimeRange: '11:00-12:00',
-      showTimeRangePicker: false
+      showTimeRange: false,
+      showTimePicker: false
     }
   },
 }
