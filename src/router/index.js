@@ -7,7 +7,7 @@ const routes = [
   {
     path: '/logs',
     name: 'Logs',
-    component: () => import('../views/logs')
+    component: () => import('../views/logs'),
   },
   {
     path: '/createLog',
@@ -43,7 +43,7 @@ const routes = [
 ]
 
 const router = new VueRouter({
-  mode: 'history',
+  mode: 'hash',
   base: process.env.BASE_URL,
   routes
 })

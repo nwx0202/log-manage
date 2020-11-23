@@ -33,18 +33,17 @@
       </div>
 
       <div class="cards">
-        <div class="card-item">
-          <p>我是日志卡片</p>
-          <p>我是日志卡片</p>
-          <p>我是日志卡片</p>
-          <p>我是日志卡片</p>
-        </div>
-        <div class="card-item">
-          <p>我是日志卡片</p>
-          <p>我是日志卡片</p>
-          <p>我是日志卡片</p>
-          <p>我是日志卡片</p>
-        </div>
+        <van-swipe-cell class="card-item" :before-close="beforeDelete">
+          <van-cell :border="false">
+            <p>我是日志卡片</p>
+            <p>我是日志卡片</p>
+            <p>我是日志卡片</p>
+            <p>我是日志卡片</p>
+          </van-cell>
+          <template #right>
+            <van-button square type="danger" text="删除" />
+          </template>
+        </van-swipe-cell>
       </div>
     </div>
   </div>
@@ -78,7 +77,7 @@ export default {
   methods: {
     // 测试
     getDate() {
-       axios.get('/api/system/get').then((res)=>{
+      axios.get('/api/system/get').then((res)=>{
         console.log(res);
       });
     },
@@ -108,6 +107,18 @@ export default {
     // 关闭popup
     cancelDatetime() {
       this.isShowDatetimePicker = false;
+    },
+
+    // 删除确认框instance 为对应的 SwipeCell 实例
+    beforeDelete({instance}) {
+      this.$dialog.confirm({
+        title: '日志删除',
+        message: '确认要删除该日志吗？',
+      }).then(() => {
+        instance.close();
+      }).catch(() => {
+        instance.close();
+      });
     }
   },
 }
@@ -130,10 +141,13 @@ export default {
   }
   .card-item {
     margin-bottom: 15px;
-    padding: .2rem .3rem;
     background-color: #fff;
     line-height: 1.3;
     box-shadow: 1px 2px 2px 1px #ccc;
+  }
+
+  .van-button--danger {
+    height: 100%;
   }
 }
 </style>

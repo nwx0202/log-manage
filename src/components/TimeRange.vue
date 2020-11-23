@@ -1,7 +1,11 @@
 <template>
   <div class="time-range">
-    <van-popup v-model="isShow" position="bottom" ref="popup" :style="{height: height}">
-      <div class="picker-header">选择时间段</div>
+    <van-popup v-model="isShow" position="bottom" ref="popup" :style="{height: height}" :close-on-click-overlay="false" @click-overlay="closePopup">
+      <div class="picker-header">
+        <van-button type="default" size="small" @click="closePopup">取消</van-button>
+        <div class="title">选择时间段</div>
+        <van-button type="info" size="small" @click="confirm">确定</van-button>
+      </div>
       <div class="picker-container" :style="{height: wrapHeight}">
         <div class="picker-column">
           <ul class="wrap" :style="hSScrollTop" @touchstart="handleTouchstart" @touchmove="handleTouchmove" @touchend="handleTouchend">
@@ -34,8 +38,6 @@
 </template>
 
 <script>
-// import {debounce} from '@/utils/common'
-
 export default {
   name: 'TimeRange',
   props: {
@@ -46,6 +48,10 @@ export default {
     isShow: {
       type: Boolean,
       default: false
+    },
+    curTimeRange: {
+      type: String,
+      default: ''
     }
   },
   data() {
@@ -58,7 +64,8 @@ export default {
       scrollTop: '0',
       isTouching: false,
       touchStartY: 0,
-      timer: null
+      timer: null,
+      scrollHeight: 0
     }
   },
   computed: {
@@ -66,7 +73,7 @@ export default {
       let arr = [];
       for (let i = 0; i < 24; i++) {
         if (i < 10) {
-          arr.push('0' + i); 
+          arr.push('0' + i);
         } else {
           arr.push(+i);
         }
@@ -84,13 +91,18 @@ export default {
       }
       return arr;
     },
-    hSScrollTop() {
-      return {
-        transform: `translate3d(0px, -${this.curH * 40}px, 0px)`,
-        'transition-duration': '400ms',
-        'transition-property': 'all',
-        '-webkit-transition-timing-function': 'cubic-bezier(0.23, 1, 0.68, 1)',
-        'transition-timing-function': 'cubic-bezier(0.23, 1, 0.68, 1)'
+    hSScrollTop: {
+      get() {
+        return {
+          transform: `translate3d(0px, -${this.scrollHeight}px, 0px)`,
+          'transition-duration': '200ms',
+          'transition-property': 'all',
+          '-webkit-transition-timing-function': 'cubic-bezier(0.23, 1, 0.68, 1)',
+          'transition-timing-function': 'cubic-bezier(0.23, 1, 0.68, 1)'
+        }
+      },
+      set(val) {
+        return val;
       }
     },
     mSScrollTop() {
@@ -123,17 +135,25 @@ export default {
   mounted() {
     // 获取当前时间
     this.getTime();
+    // 显示时间
+    this.formatTime();
   },
   methods: {
     // 获取当前时间
     getTime() {
       const date = new Date();
-      this.curH = date.getHours() < 10 ? '0' + date.getHours() : date.getHours();
+      const hour = date.getHours();
+      this.scrollHeight = hour * this.ITEM_HEIGHT;
+      this.curH = hour < 10 ? '0' + hour : hour;
       this.curM = date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
     },
 
+    // 弹框时间处理
+    formatTime() {
+      console.log(this.selectedTimeRange);
+    },
+
     handleTouchstart(event) {
-      console.log(event);
       this.isTouching = true;
       this.touchStartY = event.touches[0].clientY || event.touches[0].pageY;
     },
@@ -144,30 +164,39 @@ export default {
         return null;
       }
 
-      if (this.timer) {
-        clearTimeout(this.timer);
+      if (!this.timer) {
+        this.timer = setTimeout(() => {
+          // 滑动的高度
+          const moveY = event.touches[0].clientY || event.touches[0].pageY;
+          // 负数：往上；正数：往下
+          let direction = moveY - this.touchStartY;
+          // 如果滑动的距离大于一个item的高度的一半，直接跳到下个item
+          if(Math.abs(direction) > this.ITEM_HEIGHT / 2 && Math.abs(direction) < this.ITEM_HEIGHT) {
+            direction = direction < 0 ? -this.ITEM_HEIGHT : this.ITEM_HEIGHT;
+          }
+          // this.scrollHeight = direction < 0 ? -moveY : moveY;
+          const index = direction < 0 ? Math.floor(direction / this.ITEM_HEIGHT) : Math.ceil(direction / this.ITEM_HEIGHT);
+          this.curH = parseInt(this.curH - index);
+          this.curH = this.curH >= 23 ? 23 : this.curH;
+          this.curH = this.curH <= '00' ? '00' : this.curH < 10 ? '0' + this.curH : this.curH;
+          this.scrollHeight = this.curH * this.ITEM_HEIGHT;
+          this.timer = null;
+        }, 300);
       }
-
-      this.timer = setTimeout(() => {
-        // 移动的高度
-        const moveY = event.touches[0].clientY || event.touches[0].pageY;
-        // 负数：往上；正数：往下
-        let direction = moveY - this.touchStartY;
-        // 如果移动的距离大于一个item的高度的一半，直接跳到下个item
-        if(Math.abs(direction) > this.ITEM_HEIGHT / 2 && Math.abs(direction) < this.ITEM_HEIGHT) {
-          direction = direction < 0 ? -this.ITEM_HEIGHT : this.ITEM_HEIGHT;
-        }
-        const index = direction < 0 ? Math.floor(direction / this.ITEM_HEIGHT) : Math.ceil(direction / this.ITEM_HEIGHT);
-        this.curH = parseInt(this.curH - index);
-        this.curH = this.curH >= 23 ? 23 : this.curH;
-        this.curH = this.curH <= '00' ? '00' : this.curH < 10 ? '0' + this.curH : this.curH;
-        console.log(direction, '--', index, '---', this.curH);
-        this.timer = null;
-      }, 300);
     },
 
     handleTouchend() {
       this.isTouching = false;
+    },
+
+    // 关闭弹框
+    closePopup() {
+      this.$emit('closed', false);
+    },
+    
+    // 选中时间范围
+    confirm() {
+      this.$emit('closed', false);
     }
   },
 }
@@ -176,10 +205,15 @@ export default {
 <style lang="scss">
 .time-range {
   .picker-header {
-    height: 40px;
+    display: flex;
+    padding: 0 10px;
     line-height: 40px;
     font-size: 14px;
     text-align: center;
+    align-items: center;
+    .title {
+      flex: 2;
+    }
   }
   .picker-container {
     display: flex;
@@ -248,8 +282,8 @@ export default {
     right: -50%;
     bottom: -50%;
     left: -50%;
-    border-width: 1px 0;
-    border: 0 solid #ebedf0;
+    border-top: 1px solid #ebedf0;
+    border-bottom: 1px solid #ebedf0;
     -webkit-transform: scale(0.5);
     transform: scale(0.5);
   }

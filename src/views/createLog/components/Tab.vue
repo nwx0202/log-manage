@@ -23,7 +23,7 @@ export default {
         {
           index: 0,
           name: 'projectTab',
-          title: '项目工作',
+          title: '项目-活动',
           to: 'project'
         },
         {

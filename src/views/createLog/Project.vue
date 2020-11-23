@@ -9,9 +9,11 @@
         label="起止时间"
         :value="selectedTimeRange"
         placeholder="请选择起止时间"
-        @click="showTimeRange = true" />
+        @click="openTimeRangePopup()" />
         <TimeRange 
-          :isShow="showTimeRange" />
+          :isShow="showTimeRange"
+          :curTimeRange="selectedTimeRange"
+          @closed="closed" />
     </van-cell>
 
     <van-cell>
@@ -25,7 +27,8 @@
         placeholder="请选择填报时间"
         @click="showTimePicker = true" />
         <TimePicker 
-          :isShow="showTimePicker" />
+          :isShow="showTimePicker"
+          @closed="closed" />
     </van-cell>
 
     <van-cell>
@@ -73,9 +76,19 @@ export default {
       showProjectPicker: false,
       columns: ['杭州', '宁波', '温州', '绍兴', '湖州', '嘉兴', '金华', '衢州'],
       searchProjectVal: '',
-      selectedTimeRange: '11:00-12:00',
+      selectedTimeRange: '14:40-14:55',
+      selectedTimePicker: '14:30-15:00',
       showTimeRange: false,
       showTimePicker: false
+    }
+  },
+  methods: {
+    openTimeRangePopup() {
+      this.showTimeRange = true;
+    },
+    closed(load) {
+      this.showTimeRange = load;
+      this.showTimePicker = load;
     }
   },
 }
